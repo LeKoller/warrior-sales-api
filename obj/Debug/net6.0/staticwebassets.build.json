@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "O0eB0KsJHTDWUzu1xpnikc9uZd1e4jWbUwypIRF5JmI=",
+  "Source": "WarriorSalesAPI",
+  "BasePath": "_content/WarriorSalesAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

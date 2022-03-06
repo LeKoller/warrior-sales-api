@@ -1,0 +1,17 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: WarriorSalesDB
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=wasalesdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgresPass
+    ports:
+      - '5432:5432'
+    volumes: 
+      - wasalesdb:/postgres-data:/var/lib/postgresql/data
+
+volumes:
+  wasalesdb:
