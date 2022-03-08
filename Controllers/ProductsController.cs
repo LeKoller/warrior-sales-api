@@ -5,7 +5,7 @@ using WarriorSalesAPI.Models;
 
 namespace WarriorSalesAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/products")]
     [ApiController]
     public class ProductsController : Controller
     {
@@ -32,13 +32,13 @@ namespace WarriorSalesAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Product>>> GetList()
         {
-            return Ok(await _context.Product.ToListAsync()); 
+            return Ok(await _context.Products.ToListAsync()); 
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _context.Product.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
@@ -51,16 +51,16 @@ namespace WarriorSalesAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> AddProduct(Product product)
         {
-            await _context.Product.AddAsync(product);
+            await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
 
-            return Created("", await _context.Product.FindAsync(product.Id));
+            return Created("", await _context.Products.FindAsync(product.Id));
         }
 
-        [HttpPut]
-        public async Task<ActionResult<Product>> UpdateProduct(Product request)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Product>> UpdateProduct(Product request, int id)
         {
-            var product = await _context.Product.FindAsync(request.Id);
+            var product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
@@ -75,20 +75,20 @@ namespace WarriorSalesAPI.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(await _context.Product.FindAsync(product.Id));
+            return Ok(await _context.Products.FindAsync(product.Id));
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult<Product>> DeleteProduct(int id)
         {
-            var product = await _context.Product.FindAsync(id);
+            var product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
                 return BadRequest("Product not found.");
             }
 
-            _context.Product.Remove(product);
+            _context.Products.Remove(product);
             await _context.SaveChangesAsync();
 
             return Ok(product);

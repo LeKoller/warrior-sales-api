@@ -8,13 +8,14 @@ namespace WarriorSalesAPI.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
-        [JsonIgnore]
+        public int Id { get; }
         public DateTime Creation { get; set; } = DateTime.Now;
         public DateTime? Delivery { get; set; } = null;
         [Required]
         public string Address { get; set; } = string.Empty;
-
-        public List<Product> Products { get; set; }
+        [Required]
+        public ICollection<SaleItem> Items { get; set; }
+        [JsonIgnore]
+        public int TeamId { get; set; }
     }
 }

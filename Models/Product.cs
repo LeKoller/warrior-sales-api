@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace WarriorSalesAPI.Models
 {
@@ -7,17 +8,17 @@ namespace WarriorSalesAPI.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int Id { get; }
         [Required]
         public string Name { get; set; } = String.Empty;
         [Required]
         public float Price { get; set; } = 0;
         [Required]
-        public string Type { get; set; } = string.Empty;
+        public string Type { get; set; } = String.Empty;
         public string? Description { get; set; } = String.Empty;
         [Required]
         public int Stock { get; set; } = 0;
-
-        public List<Order> Orders { get; set; }
+        [JsonIgnore]
+        public ICollection<SaleItem>? SoldItems { get; set; }
     }
 }
