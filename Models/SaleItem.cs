@@ -11,6 +11,7 @@ namespace WarriorSalesAPI.Models
         public int Id { get; }
         [Required]
         public string Name { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
         [Required]
         public float Price { get; set; } = 0;
         [Required]

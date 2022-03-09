@@ -9,19 +9,6 @@ namespace WarriorSalesAPI.Controllers
     [ApiController]
     public class ProductsController : Controller
     {
-        // private static List<Product> products = new()
-        // {
-        //     new Product
-        //         {
-        //             Id = 1,
-        //             Name = "Beer",
-        //             Description = "Stout beer.",
-        //             Price = 16.9f,
-        //             Stock = 99,
-        //             Type = "Alcoholic bavarege."
-        //         }
-        // };
-
         private readonly WarriorSalesAPIContext _context;
 
         public ProductsController(WarriorSalesAPIContext context)
@@ -30,13 +17,13 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> GetList()
+        public async Task<ActionResult<List<Product>>> List()
         {
-            return Ok(await _context.Products.ToListAsync()); 
+            return Ok(await _context.Products.ToListAsync());
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<Product>> Retrieve(int id)
         {
             var product = await _context.Products.FindAsync(id);
 
@@ -49,16 +36,16 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> AddProduct(Product product)
+        public async Task<ActionResult<Product>> Create(Product product)
         {
-            await _context.Products.AddAsync(product);
+            _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
-            return Created("", await _context.Products.FindAsync(product.Id));
+            return Created("Product created.", await _context.Products.FindAsync(product.Id));
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Product>> UpdateProduct(Product request, int id)
+        public async Task<ActionResult<Product>> Update(Product request, int id)
         {
             var product = await _context.Products.FindAsync(id);
 
@@ -79,7 +66,7 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Product>> DeleteProduct(int id)
+        public async Task<ActionResult<Product>> Delete(int id)
         {
             var product = await _context.Products.FindAsync(id);
 

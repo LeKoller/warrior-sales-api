@@ -15,7 +15,6 @@ namespace WarriorSalesAPI.Models
         public string Address { get; set; } = string.Empty;
         [Required]
         public ICollection<SaleItem> Items { get; set; }
-        [JsonIgnore]
-        public int TeamId { get; set; }
+        public Team Team { get; set; }
     }
 }

@@ -24,44 +24,31 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Order>>> Index()
+        public async Task<ActionResult<List<Order>>> List()
         {
-            List<Product> products = new();
-            var orders = await _context.Orders.ToListAsync();
-
-            // foreach (var order in orders)
-            // {
-            //     var orderProducts = await _context.OrderProducts.Where(op => op.OrderId == order.Id).ToListAsync();
-            // 
-            //     foreach(var op in orderProducts)
-            //     {
-            //         var product = await _context.Products.FindAsync(op.ProductId);
-            // 
-            //         products.Add(product);
-            //     }
-            // 
-            //     order.Products = products;
-            // }
+            var orders = await _context.Orders
+                .Include(o => o.Items)
+                .Include(o => o.Team)
+                .ToListAsync();
 
             return Ok(orders);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> Details(int? id)
+        public async Task<ActionResult<Order>> Retrieve(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var order = await _context.Orders
-                .FirstOrDefaultAsync(m => m.Id == id);
+                .Where(o => o.Id == id)
+                .Include(o => o.Items)
+                .Include(o => o.Team)
+                .FirstAsync();
+
             if (order == null)
             {
-                return NotFound();
+                return BadRequest("Order not found.");
             }
 
-            return View(order);
+            return Ok(order);
         }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -74,13 +61,13 @@ namespace WarriorSalesAPI.Controllers
 
             if (teams.Count == 0)
             {
-                BadRequest("No team avaiable.");
+                return BadRequest("No team avaiable to execute the order.");
             }
 
             int randomIndex = new Random().Next(teams.Count);
             Team randomTeam = teams[randomIndex];
 
-            var order = new Order { Address = addOrderDTO.Address, TeamId = randomTeam.Id };
+            var order = new Order { Address = addOrderDTO.Address, Team = randomTeam };
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
             
@@ -109,6 +96,7 @@ namespace WarriorSalesAPI.Controllers
                 SaleItem saleItem = new()
                 { 
                     Name = product.Name, 
+                    Description = product.Description,
                     Order = createdOrder,
                     Price = product.Price,
                     Quantity = cartItem.Quantity,
@@ -124,82 +112,64 @@ namespace WarriorSalesAPI.Controllers
             return Created("Order created.", order);
         }
 
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> Edit(int? id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-        // 
-        //     var order = await _context.Order.FindAsync(id);
-        //     if (order == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //     return View(order);
-        // }
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<Order>> SetDelivered(int id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            
+            if (order == null)
+            {
+                return NotFound("Order not found.");
+            }
+
+            order.Delivery = DateTime.Now;
+            await _context.SaveChangesAsync();
+
+            return Ok(await _context.Orders.FindAsync(id));
+        }
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut("{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Creation,Delivery,Address")] Order order)
+        // [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(int id, UpdateOrderDTO updateOrderDTO)
         {
-            if (id != order.Id)
+            if (id != updateOrderDTO.Id)
             {
-                return NotFound();
+                return BadRequest("The id param do not match with the object id.");
             }
 
             if (ModelState.IsValid)
             {
-                try
+                var order = await _context.Orders.FindAsync(id);
+                
+                if (!OrderExists(order.Id))
                 {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
+                    return NotFound("Order not found.");
                 }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderExists(order.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+
+                order.Address = updateOrderDTO.Address;
+                await _context.SaveChangesAsync();
             }
-            return View(order);
+            return Ok(await _context.Orders.FindAsync(id));
         }
 
         
-        // public async Task<IActionResult> Delete(int? id)
-        // {
-        //     if (id == null)
-        //     {
-        //         return NotFound();
-        //     }
-        // 
-        //     var order = await _context.Order
-        //         .FirstOrDefaultAsync(m => m.Id == id);
-        //     if (order == null)
-        //     {
-        //         return NotFound();
-        //     }
-        // 
-        //     return View(order);
-        // }
-
         [HttpDelete("{id}")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        // [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (OrderExists(id))
+            {
+                var order = await _context.Orders.FindAsync(id);
+
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+
+                return NoContent(); ;
+            }
+
+            return NotFound("Order not found.");
         }
 
         private bool OrderExists(int id)

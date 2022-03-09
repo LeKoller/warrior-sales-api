@@ -17,6 +17,6 @@ namespace WarriorSalesAPI.Models
         [StringLength(8)]
         public string LicencePlate { get; set; } = "AAA-0000";
         [JsonIgnore]
-        public Order Orders { get; set; }
+        public ICollection<Order>? Orders { get; set; }
     }
 }
