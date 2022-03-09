@@ -24,14 +24,43 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Order>>> List()
+        public async Task<ActionResult<OrdersPaginationDTO>> List
+        (
+            [FromQuery] int page = 1,
+            [FromQuery] int results = 10
+        )
         {
+            List<OrderListDTO> ordersDTO = new();
+            int pageCount = (int)Math.Ceiling(_context.Orders.Count() / (float)results);
+
             var orders = await _context.Orders
-                .Include(o => o.Items)
+                .OrderByDescending(o => o.Creation)
+                .Skip((page - 1) * results)
+                .Take(results)
                 .Include(o => o.Team)
                 .ToListAsync();
 
-            return Ok(orders);
+            foreach (var order in orders)
+            {
+                OrderListDTO orderListDTO = new()
+                {
+                    Address = order.Address,
+                    Creation = order.Creation,
+                    Delivery = order.Delivery,
+                    Team = order.Team,
+                };
+
+                ordersDTO.Add(orderListDTO);
+            }
+
+            OrdersPaginationDTO responseContent = new()
+            {
+                CurrentPage = page,
+                Pages = pageCount,
+                Orders = ordersDTO
+            };
+
+            return Ok(responseContent);
         }
 
         [HttpGet("{id}")]
@@ -70,7 +99,7 @@ namespace WarriorSalesAPI.Controllers
             var order = new Order { Address = addOrderDTO.Address, Team = randomTeam };
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
-            
+
             var createdOrder = await _context.Orders.FindAsync(order.Id);
 
             if (createdOrder == null) { return BadRequest("Could not create order."); }
@@ -94,8 +123,8 @@ namespace WarriorSalesAPI.Controllers
                 product.Stock -= cartItem.Quantity;
 
                 SaleItem saleItem = new()
-                { 
-                    Name = product.Name, 
+                {
+                    Name = product.Name,
                     Description = product.Description,
                     Order = createdOrder,
                     Price = product.Price,
@@ -108,7 +137,7 @@ namespace WarriorSalesAPI.Controllers
             }
 
             await _context.SaveChangesAsync();
-                
+
             return Created("Order created.", order);
         }
 
@@ -116,7 +145,7 @@ namespace WarriorSalesAPI.Controllers
         public async Task<ActionResult<Order>> SetDelivered(int id)
         {
             var order = await _context.Orders.FindAsync(id);
-            
+
             if (order == null)
             {
                 return NotFound("Order not found.");
@@ -142,7 +171,7 @@ namespace WarriorSalesAPI.Controllers
             if (ModelState.IsValid)
             {
                 var order = await _context.Orders.FindAsync(id);
-                
+
                 if (!OrderExists(order.Id))
                 {
                     return NotFound("Order not found.");
@@ -151,10 +180,11 @@ namespace WarriorSalesAPI.Controllers
                 order.Address = updateOrderDTO.Address;
                 await _context.SaveChangesAsync();
             }
+
             return Ok(await _context.Orders.FindAsync(id));
         }
 
-        
+
         [HttpDelete("{id}")]
         // [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
