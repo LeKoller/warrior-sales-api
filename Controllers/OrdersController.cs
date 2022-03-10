@@ -1,14 +1,11 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WarriorSalesAPI.Data;
 using WarriorSalesAPI.DTOs;
 using WarriorSalesAPI.Models;
+using WarriorSalesAPI.Services;
 
 namespace WarriorSalesAPI.Controllers
 {
@@ -24,13 +21,11 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<OrdersPaginationDTO>> List
-        (
+        [AllowAnonymous]
+        public async Task<ActionResult<OrdersPaginationDTO>> List(
             [FromQuery] int page = 1,
-            [FromQuery] int results = 10
-        )
+            [FromQuery] int results = 10)
         {
-            List<OrderListDTO> ordersDTO = new();
             int pageCount = (int)Math.Ceiling(_context.Orders.Count() / (float)results);
 
             var orders = await _context.Orders
@@ -40,19 +35,7 @@ namespace WarriorSalesAPI.Controllers
                 .Include(o => o.Team)
                 .ToListAsync();
 
-            foreach (var order in orders)
-            {
-                OrderListDTO orderListDTO = new()
-                {
-                    Address = order.Address,
-                    Creation = order.Creation,
-                    Delivery = order.Delivery,
-                    Team = order.Team,
-                };
-
-                ordersDTO.Add(orderListDTO);
-            }
-
+            List<OrderListDTO> ordersDTO = OrdersService.GenerateListOfOrderListDTO(orders);
             OrdersPaginationDTO responseContent = new()
             {
                 CurrentPage = page,
@@ -64,6 +47,7 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Order>> Retrieve(int id)
         {
             var order = await _context.Orders
@@ -80,23 +64,16 @@ namespace WarriorSalesAPI.Controllers
             return Ok(order);
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        // [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<ActionResult<Order>> Create(AddOrderDTO addOrderDTO)
         {
             List<Team> teams = await _context.Teams.ToListAsync();
+            var generated = OrdersService.GenerateOrder(teams, addOrderDTO);
+            
+            if (generated.Error) { return BadRequest(generated.Message); }
 
-            if (teams.Count == 0)
-            {
-                return BadRequest("No team avaiable to execute the order.");
-            }
-
-            int randomIndex = new Random().Next(teams.Count);
-            Team randomTeam = teams[randomIndex];
-
-            var order = new Order { Address = addOrderDTO.Address, Team = randomTeam };
+            Order order = generated.Payload;
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
 
@@ -107,41 +84,25 @@ namespace WarriorSalesAPI.Controllers
             foreach (CartItem cartItem in addOrderDTO.Cart)
             {
                 var product = await _context.Products.FindAsync(cartItem.Id);
+                var validate = OrdersService.ValidateSaleItemWithProduct(cartItem, product);
+                int quantity = cartItem.Quantity;
 
-                if (product == null)
-                {
-                    return BadRequest($"Product named {cartItem.Name} was not found.");
-                }
+                if (validate.Error) { return BadRequest(validate.Message); }
 
-                if (cartItem.Quantity > product.Stock)
-                {
-                    return Forbid(
-                        $"Product named {cartItem.Name} has an insuficient stock of {product.Stock} items."
-                    );
-                }
-
-                product.Stock -= cartItem.Quantity;
-
-                SaleItem saleItem = new()
-                {
-                    Name = product.Name,
-                    Description = product.Description,
-                    Order = createdOrder,
-                    Price = product.Price,
-                    Quantity = cartItem.Quantity,
-                    Product = product,
-                };
-
+                SaleItem saleItem = OrdersService.GenerateSaleItem(product, createdOrder, quantity);
+                
+                product.Stock -= quantity;
                 _context.SaleItems.Add(saleItem);
                 await _context.SaveChangesAsync();
             }
 
             await _context.SaveChangesAsync();
 
-            return Created("Order created.", order);
+            return Created("Order created.", createdOrder);
         }
 
         [HttpPatch("{id}")]
+        [Authorize]
         public async Task<ActionResult<Order>> SetDelivered(int id)
         {
             var order = await _context.Orders.FindAsync(id);
@@ -157,10 +118,8 @@ namespace WarriorSalesAPI.Controllers
             return Ok(await _context.Orders.FindAsync(id));
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut("{id}")]
-        // [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Update(int id, UpdateOrderDTO updateOrderDTO)
         {
             if (id != updateOrderDTO.Id)
@@ -186,7 +145,7 @@ namespace WarriorSalesAPI.Controllers
 
 
         [HttpDelete("{id}")]
-        // [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             if (OrderExists(id))
