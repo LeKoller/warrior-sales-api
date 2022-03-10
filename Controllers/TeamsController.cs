@@ -21,12 +21,6 @@ namespace WarriorSalesAPI.Controllers
         {
             return Ok(await _context.Teams.ToListAsync());
         }
-
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
         
         [HttpPost]
         public async Task<ActionResult<Team>> Create(Team team)
@@ -37,14 +31,25 @@ namespace WarriorSalesAPI.Controllers
             return Created("Team created.", await _context.Teams.FindAsync(team.Id));
         }
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
         {
+            if (TeamExists(id))
+            {
+                var team = await _context.Teams.FindAsync(id);
+
+                _context.Teams.Remove(team);
+                await _context.SaveChangesAsync();
+
+                return NoContent(); ;
+            }
+
+            return NotFound("Order not found.");
         }
 
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        private bool TeamExists(int id)
         {
+            return _context.Teams.Any(e => e.Id == id);
         }
     }
 }

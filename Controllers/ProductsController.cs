@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarriorSalesAPI.Data;
 using WarriorSalesAPI.Models;
@@ -23,6 +24,7 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Product>> Retrieve(int id)
         {
             var product = await _context.Products.FindAsync(id);
@@ -57,7 +59,7 @@ namespace WarriorSalesAPI.Controllers
             product.Name = request.Name;
             product.Description = request.Description;
             product.Price = request.Price;  
-            product.Type = request.Type;
+            product.Category = request.Category;
             product.Stock = request.Stock;
 
             await _context.SaveChangesAsync();

@@ -24,7 +24,7 @@ namespace WarriorSalesAPI.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<OrdersPaginationDTO>> List(
             [FromQuery] int page = 1,
-            [FromQuery] int results = 10)
+            [FromQuery] int results = 20)
         {
             int pageCount = (int)Math.Ceiling(_context.Orders.Count() / (float)results);
 

@@ -11,6 +11,7 @@ namespace WarriorSalesAPI.DTOs
 
     public class OrderListDTO
     {
+        public int Id { get; set; }
         public string Address { get; set; } = string.Empty;
         public DateTime Creation { get; set; } = DateTime.Now;
         public DateTime? Delivery { get; set; } = null;

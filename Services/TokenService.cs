@@ -14,7 +14,7 @@ namespace WarriorSalesAPI.Services
             var key = Encoding.ASCII.GetBytes(Settings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[] { new Claim("Username", "UsernameExample") }),
+                Subject = new ClaimsIdentity(new[] { new Claim("username", "username_example") }),
                 Expires = null,
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),

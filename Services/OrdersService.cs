@@ -13,6 +13,7 @@ namespace WarriorSalesAPI.Services
             {
                 OrderListDTO orderListDTO = new()
                 {
+                    Id = order.Id,
                     Address = order.Address,
                     Creation = order.Creation,
                     Delivery = order.Delivery,
@@ -39,7 +40,7 @@ namespace WarriorSalesAPI.Services
             Team randomTeam = teams[new Random().Next(teamsCount)];
             var order = new Order { Address = addOrderDTO.Address, Team = randomTeam };
 
-            result.Result = order;
+            result.Payload = order;
 
             return result;
         }
