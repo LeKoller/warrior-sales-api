@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "6acOP5QQrh31UqhCzkpFIKjYuvUg7l3xH9DaDv7UOvhoWqfI/yf3PI6wRmWge5JhNTGF5fzXZ4H7HXfPT3Tzxg==",
+  "dgSpecHash": "q73yYkYIgYSt80kCG34JMRHyAIdgXUzcwd+nmro4aA7VWCFegauFEahOFFCRM26Pav8oijJw26r+I/h2tvFcVw==",
   "success": true,
   "projectFilePath": "C:\\Users\\lekol\\source\\repos\\WarriorSalesAPI\\WarriorSalesAPI\\WarriorSalesAPI.csproj",
   "expectedPackageFiles": [
@@ -12,6 +12,7 @@
     "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.authentication.abstractions\\2.2.0\\microsoft.aspnetcore.authentication.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.authentication.core\\2.2.0\\microsoft.aspnetcore.authentication.core.2.2.0.nupkg.sha512",
     "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.3\\microsoft.aspnetcore.authentication.jwtbearer.6.0.3.nupkg.sha512",
+    "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.cors\\2.2.0\\microsoft.aspnetcore.cors.2.2.0.nupkg.sha512",
     "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\2.2.0\\microsoft.aspnetcore.cryptography.internal.2.2.0.nupkg.sha512",
     "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.dataprotection\\2.2.0\\microsoft.aspnetcore.dataprotection.2.2.0.nupkg.sha512",
     "C:\\Users\\lekol\\.nuget\\packages\\microsoft.aspnetcore.dataprotection.abstractions\\2.2.0\\microsoft.aspnetcore.dataprotection.abstractions.2.2.0.nupkg.sha512",

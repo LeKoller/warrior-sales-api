@@ -5,14 +5,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using WarriorSalesAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
+var key = Encoding.ASCII.GetBytes(Settings.Secret);
 
 builder.Services.AddDbContext<WarriorSalesAPIContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("WarriorSalesDB")));
 
 // Add services to the container.
 builder.Services.AddControllers();
-var key = Encoding.ASCII.GetBytes(Settings.Secret);
-builder.Services.AddAuthentication(x => 
+builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -26,10 +26,10 @@ builder.Services.AddAuthentication(x =>
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = false,
         ValidateAudience = false,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ValidateLifetime = false,
     };
 });
+builder.Services.AddCors();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -47,11 +47,15 @@ if (app.Environment.IsDevelopment())
 AppContext.SetSwitch("Npgsql.DisableDateTimeInfinityConversions", true);
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-app.UseHttpsRedirection();
+app.UseCors(options =>
+{
+    options.AllowAnyOrigin();
+    options.AllowAnyHeader();
+});
 
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WarriorSalesAPI.Data;
@@ -11,9 +12,10 @@ using WarriorSalesAPI.Data;
 namespace WarriorSalesAPI.Migrations
 {
     [DbContext(typeof(WarriorSalesAPIContext))]
-    partial class WarriorSalesAPIContextModelSnapshot : ModelSnapshot
+    [Migration("20220312020139_FixLicensePlateColumnName")]
+    partial class FixLicensePlateColumnName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -15,7 +15,7 @@ namespace WarriorSalesAPI.Models
         public float Price { get; set; } = 0;
         [Required]
         public string Category { get; set; } = String.Empty;
-        public string? Description { get; set; } = String.Empty;
+        public string Description { get; set; } = String.Empty;
         [Required]
         public int Stock { get; set; } = 0;
         [JsonIgnore]
