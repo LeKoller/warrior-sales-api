@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WarriorSalesAPI.Data;
+using WarriorSalesAPI.DTOs;
 using WarriorSalesAPI.Models;
 
 namespace WarriorSalesAPI.Controllers
@@ -18,9 +19,28 @@ namespace WarriorSalesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Product>>> List()
+        public async Task<ActionResult<List<Product>>> List(
+            [FromQuery] int page = 1,
+            [FromQuery] int results = 20)
         {
-            return Ok(await _context.Products.ToListAsync());
+            int productsCount = _context.Products.Count();
+            int pageCount = (int)Math.Ceiling(productsCount / (float)results);
+
+            var products = await _context.Products
+                .OrderByDescending(p => p.Id)
+                .Skip((page - 1) * results)
+                .Take(results)
+                .ToListAsync();
+
+            ProductsPaginationDTO responseContent = new()
+            {
+                CurrentPage = page,
+                Pages = pageCount,
+                Products = products,
+                Total = productsCount,
+            };
+
+            return Ok(responseContent);
         }
 
         [HttpGet("{id}")]

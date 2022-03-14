@@ -4,9 +4,10 @@ namespace WarriorSalesAPI.DTOs
 {
     public class OrdersPaginationDTO
     {
-        public List<OrderListDTO> Orders { get; set; } = new List<OrderListDTO>();
+        public List<OrderListDTO> Orders { get; set; } = new();
         public int Pages { get; set; }
         public int CurrentPage { get; set; }
+        public int Total { get; set; }
     }
 
     public class OrderListDTO

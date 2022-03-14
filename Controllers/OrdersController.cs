@@ -26,7 +26,8 @@ namespace WarriorSalesAPI.Controllers
             [FromQuery] int page = 1,
             [FromQuery] int results = 20)
         {
-            int pageCount = (int)Math.Ceiling(_context.Orders.Count() / (float)results);
+            int ordersCount = _context.Orders.Count(); 
+            int pageCount = (int)Math.Ceiling(ordersCount / (float)results);
 
             var orders = await _context.Orders
                 .OrderByDescending(o => o.Creation)
@@ -40,7 +41,8 @@ namespace WarriorSalesAPI.Controllers
             {
                 CurrentPage = page,
                 Pages = pageCount,
-                Orders = ordersDTO
+                Orders = ordersDTO,
+                Total = ordersCount,
             };
 
             return Ok(responseContent);
