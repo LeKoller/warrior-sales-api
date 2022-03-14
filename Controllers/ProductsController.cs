@@ -60,6 +60,13 @@ namespace WarriorSalesAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> Create(Product product)
         {
+            var isThereHomonymousProduct = await _context.Products.AnyAsync(p => p.Name == product.Name);
+
+            if (isThereHomonymousProduct == true)
+            {
+                return BadRequest("There is already a product registerer under the name " + product.Name + ".");
+            }
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
@@ -78,7 +85,7 @@ namespace WarriorSalesAPI.Controllers
 
             product.Name = request.Name;
             product.Description = request.Description;
-            product.Price = request.Price;  
+            product.Price = request.Price;
             product.Category = request.Category;
             product.Stock = request.Stock;
 
